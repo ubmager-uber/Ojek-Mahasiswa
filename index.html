@@ -146,7 +146,7 @@
       padding-right: 30px;
     }
     .point-button.selected:after {
-      content: "✓";
+      content: "";
       position: absolute;
       right: 10px;
       top: 50%;
@@ -163,7 +163,7 @@
       transform: translateY(-50%);
       border-radius: 3px;
       cursor: pointer;
-      display: none;
+      display: block;
     }
     .point-button.selected .cancel-button {
       display: inline-block;
@@ -176,19 +176,19 @@
     }
     .map-instruction {
       position: absolute;
-      bottom: 20px;
+      top: 10px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(255,255,255,0.9);
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.7rem;
       color: #333;
       font-weight: bold;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       z-index: 1000;
       pointer-events: none;
-      max-width: 80%;
+      max-width: 70%;
       text-align: center;
     }
   </style>
@@ -220,11 +220,11 @@
       <div class="map-control-panel" style="top: auto; bottom: 10px;">
         <button type="button" id="pickupBtn" class="point-button pickup">
           <i class="fas fa-map-marker-alt"></i> Titik Penjemputan
-          <span class="cancel-button">X</span>
+          <span class="cancel-button" id="cancelPickup">X</span>
         </button>
         <button type="button" id="destinationBtn" class="point-button destination">
           <i class="fas fa-flag"></i> Titik Tujuan
-          <span class="cancel-button">X</span>
+          <span class="cancel-button" id="cancelDestination">X</span>
         </button>
       </div>
       <div class="map-instruction" id="mapInstruction">
@@ -368,12 +368,12 @@
   });
   
   // Setup handler tombol batal
-  document.querySelector('#pickupBtn .cancel-button').addEventListener('click', function(e) {
+  document.getElementById('cancelPickup').addEventListener('click', function(e) {
     e.stopPropagation();
     removePickupPoint();
   });
   
-  document.querySelector('#destinationBtn .cancel-button').addEventListener('click', function(e) {
+  document.getElementById('cancelDestination').addEventListener('click', function(e) {
     e.stopPropagation();
     removeDestinationPoint();
   });
@@ -551,19 +551,25 @@
   
   function updatePickupButtonState() {
     const pickupBtn = document.getElementById('pickupBtn');
+    const cancelPickup = document.getElementById('cancelPickup');
     if (pickupLatLng) {
       pickupBtn.classList.add('selected');
+      cancelPickup.style.display = 'block';
     } else {
       pickupBtn.classList.remove('selected');
+      cancelPickup.style.display = 'none';
     }
   }
   
   function updateDestinationButtonState() {
     const destBtn = document.getElementById('destinationBtn');
+    const cancelDestination = document.getElementById('cancelDestination');
     if (destinationLatLng) {
       destBtn.classList.add('selected');
+      cancelDestination.style.display = 'block';
     } else {
       destBtn.classList.remove('selected');
+      cancelDestination.style.display = 'none';
     }
   }
 
@@ -651,6 +657,10 @@
     
   // Inisialisasi instruksi peta
   updateMapInstruction();
+  
+  // Inisialisasi status tombol cancel
+  document.getElementById('cancelPickup').style.display = 'none';
+  document.getElementById('cancelDestination').style.display = 'none';
 </script>
 </body>
 </html>
