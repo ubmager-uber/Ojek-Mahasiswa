@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UBER - UB MAGER</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background-color: #0c1a3e;
+      color: white;
+    }
+    header {
+      background-color: #f7b500;
+      color: #0c1a3e;
+      padding: 1rem;
+      text-align: center;
+    }
+    .container {
+      padding: 1rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    #mainMap {
+      height: 300px;
+      width: 90%;
+      margin: 0 auto 1rem;
+      border-radius: 10px;
+      position: relative;
+      z-index: 0;
+    }
+    label {
+      display: block;
+      margin: 0.5rem 0 0.2rem;
+      font-weight: bold;
+    }
+    input, button, select, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    input::placeholder, textarea::placeholder {
+      color: #aaa;
+    }
+    input, select, textarea {
+      margin-bottom: 1rem;
+    }
+    #distance {
+      background-color: #e0f7ff;
+      font-weight: bold;
+    }
+    #cost {
+      background-color: #d4fcd6;
+      font-weight: bold;
+    }
+    button {
+      background-color: #f7b500;
+      color: #0c1a3e;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #e0a800;
+    }
+    .wa-btn {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    .wa-btn a {
+      background-color: #25d366;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-block;
+      font-weight: bold;
+    }
+    .leaflet-routing-container {
+      display: none !important;
+    }
+    .subtitle {
+      font-size: 0.85rem;
+      color: #ddd;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .tariff-info {
+      background-color: rgba(247, 181, 0, 0.2);
+      border-radius: 8px;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    /* Styles for point selection panel */
+    .map-control-panel {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      width: auto;
+      padding: 8px;
+    }
+    .point-button {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-align: left;
+      position: relative;
+    }
+    .point-button:last-child {
+      margin-bottom: 0;
+    }
+    .point-button.pickup {
+      background-color: #FF5252;
+      color: white;
+    }
+    .point-button.destination {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .point-button i {
+      margin-right: 5px;
+    }
+    .point-button.active {
+      box-shadow: 0 0 0 2px #0066ff;
+    }
+    .point-button.selected {
+      padding-right: 30px;
+    }
+    .point-button.selected:after {
+      content: "✓";
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .cancel-button {
+      background-color: #f0f0f0;
+      color: #555;
+      font-size: 0.8rem;
+      padding: 3px 6px;
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 3px;
+      cursor: pointer;
+      display: none;
+    }
+    .point-button.selected .cancel-button {
+      display: inline-block;
+    }
+    .leaflet-marker-icon {
+      transition: transform 0.2s ease;
+    }
+    .leaflet-marker-icon.highlight {
+      transform: scale(1.2);
+    }
+    .map-instruction {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.9);
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: #333;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 1000;
+      pointer-events: none;
+      max-width: 80%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1 style="margin-bottom: 0;">UBER</h1>
+  <h2 style="margin-top: 0;">(OJEK UB MAGER)</h2>
+  <p style="font-size: 0.9rem;">Layanan Ojek Mahasiswa dengan Harga Ramah di Kantong Mahasiswa</p>
+</header>
+<div class="container">
+
+  
+  <form id="orderForm">
+    <label for="name">Nama Pemesan</label>
+    <input type="text" id="name" name="name" placeholder="Nama kakaknya siapa nih?" required />
+    <label for="type">Tipe Pesanan</label>
+    <select id="type" name="type" required>
+      <option value="Ojek Motor">Ojek Motor</option>
+      <option value="Antar Barang">Antar Barang</option>
+    </select>
+
+    <label for="notes">Catatan</label>
+    <textarea id="notes" name="notes" rows="2" placeholder="Isi catatan tambahan jika perlu..." style="font-family: inherit;"></textarea>
+
+    <label for="mainMap">Pilih Lokasi</label>
+    <div class="subtitle">Pilih titik penjemputan dan tujuan dengan tombol di pojok kanan peta</div>
+    <div id="mainMap">
+      <div class="map-control-panel" style="top: auto; bottom: 10px;">
+        <button type="button" id="pickupBtn" class="point-button pickup">
+          <i class="fas fa-map-marker-alt"></i> Titik Penjemputan
+          <span class="cancel-button">X</span>
+        </button>
+        <button type="button" id="destinationBtn" class="point-button destination">
+          <i class="fas fa-flag"></i> Titik Tujuan
+          <span class="cancel-button">X</span>
+        </button>
+      </div>
+      <div class="map-instruction" id="mapInstruction">
+        Pilih "Titik Penjemputan" atau "Titik Tujuan" lalu klik pada peta
+      </div>
+    </div>
+
+    <button type="button" onclick="calculateFare()">Hitung Tarif</button>
+
+    <label for="distance">Jarak (km)</label>
+    <input type="text" id="distance" name="distance" readonly />
+
+    <label for="cost">Biaya (Rp)</label>
+    <input type="text" id="cost" name="cost" readonly />
+
+    <label for="payment">Metode Pembayaran</label>
+    <select id="payment" name="payment" required>
+      <option value="Cash">Cash</option>
+      <option value="QRIS">QRIS</option>
+    </select>
+  </form>  
+  <div class="wa-btn">
+    <a id="waLink" href="#" target="_blank" rel="noopener noreferrer">Pesan Sekarang</a>
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+<script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+<script>
+  const redIcon = L.icon({
+    iconUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon-red.png',
+    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
+    shadowSize: [41, 41]
+  });
+  
+  const greenIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-shadow.png',
+    shadowSize: [41, 41]
+  });
+
+  let pickupMarker = null;
+  let destinationMarker = null;
+  let pickupLatLng = null;
+  let destinationLatLng = null;
+  let routingControl = null;
+  let activePointSelection = null; // 'pickup' or 'destination' or null
+
+  // Membuat peta dengan lokasi pusat di UB Malang
+  const mainMap = L.map('mainMap', { zoomControl: false }).setView([-7.955, 112.614], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mainMap);
+  L.control.zoom({ position: 'topleft' }).addTo(mainMap);
+
+  // Tombol lokasi saya
+  L.control.locate({
+    position: 'topleft',
+    strings: { title: "Tunjukkan Lokasi Saya" },
+    flyTo: true,
+    showPopup: false,
+    setView: 'once',
+    keepCurrentZoomLevel: true,
+    onLocationError: function(e) {
+      alert("Tidak dapat menemukan lokasi Anda. Pastikan GPS aktif dan Anda mengizinkan akses lokasi.");
+    },
+    onLocationOutsideMapBounds: function(e) {
+      alert("Lokasi Anda berada di luar wilayah Malang-Batu.");
+    }
+  }).addTo(mainMap);
+
+  // Geocoder dengan Nominatim bahasa Indonesia dengan batasan area Malang-Batu
+  const malangBatuBounds = L.latLngBounds(
+    L.latLng(-8.070, 112.500), // Batas selatan dan barat
+    L.latLng(-7.800, 112.750)  // Batas utara dan timur
+  );
+  
+  const geocoder = L.Control.geocoder({
+    geocoder: new L.Control.Geocoder.Nominatim({ 
+      language: 'id',
+      geocodingQueryParams: {
+        'viewbox': '112.500,-8.070,112.750,-7.800',
+        'bounded': '1'
+      }
+    }),
+    placeholder: 'Cari lokasi di Malang-Batu...',
+    defaultMarkGeocode: false,
+    position: 'topright',
+    suggestMinLength: 3,
+    suggestTimeout: 250,
+    queryMinLength: 3
+  }).addTo(mainMap);
+
+  // Tangani hasil pencarian
+  geocoder.on('markgeocode', function(e) {
+    const center = e.geocode.center;
+    
+    // Periksa apakah lokasi berada dalam batas Malang-Batu
+    if (!malangBatuBounds.contains(center)) {
+      alert("Lokasi yang dipilih berada di luar wilayah Malang-Batu.");
+      return;
+    }
+    
+    if (activePointSelection === 'pickup') {
+      setPickupPoint(center);
+    } else if (activePointSelection === 'destination') {
+      setDestinationPoint(center);
+    } else {
+      // Tampilkan pesan yang lebih ramah
+      document.getElementById('mapInstruction').textContent = "Pilih 'Titik Penjemputan' atau 'Titik Tujuan' dulu ya";
+      setTimeout(() => updateMapInstruction(), 3000); // Reset pesan setelah 3 detik
+    }
+    
+    mainMap.setView(center, 17);
+  });
+
+  // Event handler untuk klik pada peta
+  mainMap.on("click", function(e) {
+    if (activePointSelection === 'pickup') {
+      setPickupPoint(e.latlng);
+    } else if (activePointSelection === 'destination') {
+      setDestinationPoint(e.latlng);
+    } else {
+      // Tidak melakukan apa-apa jika tidak ada pilihan aktif
+      updateMapInstruction();
+    }
+  });
+
+  // Setup tombol pemilihan titik
+  document.getElementById('pickupBtn').addEventListener('click', function(e) {
+    // Mencegah event klik diteruskan ke peta
+    e.stopPropagation();
+    togglePointSelection('pickup');
+  });
+  
+  document.getElementById('destinationBtn').addEventListener('click', function(e) {
+    // Mencegah event klik diteruskan ke peta
+    e.stopPropagation();
+    togglePointSelection('destination');
+  });
+  
+  // Setup handler tombol batal
+  document.querySelector('#pickupBtn .cancel-button').addEventListener('click', function(e) {
+    e.stopPropagation();
+    removePickupPoint();
+  });
+  
+  document.querySelector('#destinationBtn .cancel-button').addEventListener('click', function(e) {
+    e.stopPropagation();
+    removeDestinationPoint();
+  });
+  
+  function togglePointSelection(pointType) {
+    const pickupBtn = document.getElementById('pickupBtn');
+    const destBtn = document.getElementById('destinationBtn');
+    
+    // Jika tombol yang sama diklik, maka nonaktifkan
+    if (pointType === activePointSelection) {
+      activePointSelection = null;
+      pickupBtn.classList.remove('active');
+      destBtn.classList.remove('active');
+    } else {
+      // Reset active state terlebih dahulu
+      pickupBtn.classList.remove('active');
+      destBtn.classList.remove('active');
+      
+      // Set active state pada tombol yang dipilih
+      if (pointType === 'pickup') {
+        activePointSelection = 'pickup';
+        pickupBtn.classList.add('active');
+      } else if (pointType === 'destination') {
+        activePointSelection = 'destination';
+        destBtn.classList.add('active');
+      }
+    }
+    
+    updateMapInstruction();
+  }
+  
+  function updateMapInstruction() {
+    const instruction = document.getElementById('mapInstruction');
+    
+    if (activePointSelection === 'pickup') {
+      instruction.textContent = "Klik pada peta untuk memilih titik penjemputan";
+    } else if (activePointSelection === 'destination') {
+      instruction.textContent = "Klik pada peta untuk memilih titik tujuan";
+    } else if (pickupLatLng && destinationLatLng) {
+      instruction.textContent = "Titik penjemputan dan tujuan telah dipilih";
+    } else if (pickupLatLng) {
+      instruction.textContent = "Pilih 'Titik Tujuan' untuk melanjutkan";
+    } else if (destinationLatLng) {
+      instruction.textContent = "Pilih 'Titik Penjemputan' untuk melanjutkan";
+    } else {
+      instruction.textContent = "Pilih 'Titik Penjemputan' atau 'Titik Tujuan' lalu klik pada peta";
+    }
+  }
+  
+  function setPickupPoint(latlng) {
+    pickupLatLng = latlng;
+    
+    // Hapus marker lama jika ada
+    if (pickupMarker) {
+      mainMap.removeLayer(pickupMarker);
+    }
+    
+    // Buat marker baru
+    pickupMarker = L.marker(latlng, { 
+      icon: redIcon, 
+      draggable: true 
+    }).addTo(mainMap).bindPopup("Titik Penjemputan").openPopup();
+    
+    // Event handler untuk drag
+    pickupMarker.on('dragend', function(e) {
+      pickupLatLng = e.target.getLatLng();
+      updatePickupButtonState();
+      
+      // Hapus rute yang ada jika ada
+      if (routingControl) {
+        mainMap.removeControl(routingControl);
+        routingControl = null;
+      }
+    });
+    
+    // Animasi marker
+    const markerIcon = pickupMarker._icon;
+    markerIcon.classList.add('highlight');
+    setTimeout(() => {
+      markerIcon.classList.remove('highlight');
+    }, 700);
+    
+    updatePickupButtonState();
+    
+    // Reset pemilihan aktif
+    activePointSelection = null;
+    document.getElementById('pickupBtn').classList.remove('active');
+    
+    // Hapus rute yang ada jika ada
+    if (routingControl) {
+      mainMap.removeControl(routingControl);
+      routingControl = null;
+    }
+  }
+  
+  function setDestinationPoint(latlng) {
+    destinationLatLng = latlng;
+    
+    // Hapus marker lama jika ada
+    if (destinationMarker) {
+      mainMap.removeLayer(destinationMarker);
+    }
+    
+    // Buat marker baru
+    destinationMarker = L.marker(latlng, { 
+      icon: greenIcon, 
+      draggable: true 
+    }).addTo(mainMap).bindPopup("Titik Tujuan").openPopup();
+    
+    // Event handler untuk drag
+    destinationMarker.on('dragend', function(e) {
+      destinationLatLng = e.target.getLatLng();
+      updateDestinationButtonState();
+      
+      // Hapus rute yang ada jika ada
+      if (routingControl) {
+        mainMap.removeControl(routingControl);
+        routingControl = null;
+      }
+    });
+    
+    // Animasi marker
+    const markerIcon = destinationMarker._icon;
+    markerIcon.classList.add('highlight');
+    setTimeout(() => {
+      markerIcon.classList.remove('highlight');
+    }, 700);
+    
+    updateDestinationButtonState();
+    
+    // Reset pemilihan aktif
+    activePointSelection = null;
+    document.getElementById('destinationBtn').classList.remove('active');
+    
+    // Hapus rute yang ada jika ada
+    if (routingControl) {
+      mainMap.removeControl(routingControl);
+      routingControl = null;
+    }
+  }
+  
+  function removePickupPoint() {
+    if (pickupMarker) {
+      mainMap.removeLayer(pickupMarker);
+      pickupMarker = null;
+      pickupLatLng = null;
+      updatePickupButtonState();
+      
+      // Hapus rute yang ada jika ada
+      if (routingControl) {
+        mainMap.removeControl(routingControl);
+        routingControl = null;
+      }
+      
+      updateMapInstruction();
+    }
+  }
+  
+  function removeDestinationPoint() {
+    if (destinationMarker) {
+      mainMap.removeLayer(destinationMarker);
+      destinationMarker = null;
+      destinationLatLng = null;
+      updateDestinationButtonState();
+      
+      // Hapus rute yang ada jika ada
+      if (routingControl) {
+        mainMap.removeControl(routingControl);
+        routingControl = null;
+      }
+      
+      updateMapInstruction();
+    }
+  }
+  
+  function updatePickupButtonState() {
+    const pickupBtn = document.getElementById('pickupBtn');
+    if (pickupLatLng) {
+      pickupBtn.classList.add('selected');
+    } else {
+      pickupBtn.classList.remove('selected');
+    }
+  }
+  
+  function updateDestinationButtonState() {
+    const destBtn = document.getElementById('destinationBtn');
+    if (destinationLatLng) {
+      destBtn.classList.add('selected');
+    } else {
+      destBtn.classList.remove('selected');
+    }
+  }
+
+  function calculateFare() {
+    if (!pickupLatLng || !destinationLatLng) {
+      alert('Tentukan titik penjemputan dan tujuan dulu ya!');
+      return;
+    }
+    
+    // Hapus rute yang ada jika ada
+    if (routingControl) {
+      mainMap.removeControl(routingControl);
+    }
+    
+    routingControl = L.Routing.control({
+      waypoints: [pickupLatLng, destinationLatLng],
+      lineOptions: { styles: [{ color: '#FF0000', opacity: 0.9, weight: 5 }] }, // Ganti warna menjadi merah (#FF0000)
+      routeWhileDragging: false,
+      draggableWaypoints: false,
+      addWaypoints: false,
+      fitSelectedRoutes: true,
+      showAlternatives: false,
+      createMarker: () => null
+    }).addTo(mainMap);
+
+    routingControl.on('routesfound', function(e) {
+      const route = e.routes[0];
+      const distance = route.summary.totalDistance / 1000;
+      
+      // Perhitungan tarif
+      let cost;
+      if (distance < 2.5) {
+        // Tarif flat untuk jarak < 2.5km
+        cost = 5000;
+      } else {
+        // Tarif per km untuk jarak >= 2.5km
+        cost = distance * 2000;
+      }
+      
+      document.getElementById('distance').value = distance.toFixed(2);
+      document.getElementById('cost').value = 'Rp ' + cost.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      updateWhatsAppLink(distance, cost);
+      
+      // Zoom ke rute lengkap
+      setTimeout(() => {
+        mainMap.fitBounds(L.latLngBounds([pickupLatLng, destinationLatLng]).pad(0.3));
+      }, 300);
+    });
+  }
+
+  function updateWhatsAppLink(distance, cost) {
+    const name = document.getElementById('name').value.trim();
+    const type = document.getElementById('type').value;
+    const notes = document.getElementById('notes').value.trim();
+    const payment = document.getElementById('payment').value;
+    const pickupText = pickupLatLng ? `${pickupLatLng.lat.toFixed(10)},${pickupLatLng.lng.toFixed(10)}` : '';
+    const destText = destinationLatLng ? `${destinationLatLng.lat.toFixed(10)},${destinationLatLng.lng.toFixed(10)}` : '';
+
+    // Buat bold teks di WhatsApp dengan * tanda
+    const message = `Halo admin UBER, saya *${name}* ingin memesan UBER:%0A` +
+      `Tipe Pesanan: *${type}*%0A%0A` +
+      `Titik Penjemputan:%0Ahttps://maps.google.com/?q=${pickupText}%0A--%0A` +
+      `Titik Tujuan:%0Ahttps://maps.google.com/?q=${destText}%0A%0A` +
+      `Catatan:%0A${notes ? '*' + notes + '*' : '-'}%0A%0A` +
+      `Jarak: *${distance.toFixed(2)} km*%20%20%0A` +
+      `Total Tarif: *Rp${cost.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}*%0A` +
+      `Metode Pembayaran: *${payment}*`;
+
+    // Ubah format nomor telepon menjadi kode negara internasional +62
+    const waLink = `https://wa.me/+6287717392285?text=${message}`;
+    document.getElementById('waLink').href = waLink;
+  }
+  
+  // Fix URL untuk redIcon karena URL saat ini mungkin tidak valid
+  fetch('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png')
+    .then(response => {
+      if (response.ok) {
+        redIcon.options.iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+      }
+    })
+    .catch(() => {
+      // Fallback ke default marker jika gagal
+      redIcon.options.iconUrl = 'https://unpkg.com/leaflet@1.9.3/dist/images/marker-icon.png';
+    });
+    
+  // Inisialisasi instruksi peta
+  updateMapInstruction();
+</script>
+</body>
+</html>
