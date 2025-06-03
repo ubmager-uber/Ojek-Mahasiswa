@@ -28,7 +28,7 @@ header {
     margin: auto;
 }
 #mainMap {
-    height: 450px;
+    height: 460px;
     width: 99%;
     margin: 0 auto 1rem;
     border-radius: 10px;
@@ -155,7 +155,7 @@ button:hover {
     cursor: pointer;
     border-bottom: 1px solid #eee;
     color: #333;
-    font-size: 0.85rem;
+    font-size: 0.7rem;
 }
 
 .search-result-item:hover {
@@ -188,7 +188,7 @@ button:hover {
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 0.7rem;
     text-align: center;
     position: relative;
     white-space: nowrap;
@@ -225,7 +225,7 @@ button:hover {
 .cancel-button {
     background-color: rgba(255,255,255,0.3); /* Slightly transparent white for cancel */
     color: #0c1a3e; /* Dark text for cancel */
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     padding: 3px 6px;
     position: absolute;
     right: 5px;
@@ -292,7 +292,7 @@ button:hover {
     }
     
     .point-button {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
         padding: 8px 12px;
         margin: 0; /* Hilangkan semua margin */
         display: flex;
@@ -317,7 +317,8 @@ button:hover {
 <header>
     <h1 style="margin-bottom: 0;">UBER</h1>
     <h2 style="margin-top: 0;">(OJEK UB MAGER)</h2>
-    <p style="font-size: 0.9rem;">Layanan Ojek Mahasiswa dengan Harga Ramah di Kantong Mahasiswa</p>
+    <p style="font-size: 0.9rem;"> 🅾 𝐈𝐧𝐬𝐭𝐚𝐠𝐫𝐚𝐦 : @uber.mlg
+   </p>
 </header>
 <div class="container">
     
@@ -327,8 +328,8 @@ button:hover {
         
         <label for="type">Tipe Pesanan</label>
         <select id="type" name="type" required>
-            <option value="Ojek Motor">Ojek Motor</option>
-            <option value="Antar Barang">Antar Barang</option>
+            <option value="Ojek Motor">Ojek Motor (Penumpang)️</option>
+            <option value="Antar Barang/Makanan">Antar Barang/Makanan</option>
         </select>
 
         <label for="notes">Catatan</label>
@@ -339,11 +340,11 @@ button:hover {
         <div id="mainMap">
             <div class="search-controls">
                 <div class="search-box">
-                    <input type="text" id="pickupSearch" class="search-input" placeholder="🔵 Titik Penjemputan (contoh: Jalan Veteran)">
+                    <input type="text" id="pickupSearch" class="search-input" placeholder="🔵 Cari Titik Penjemputan (contoh: Jalan Veteran)">
                     <div id="pickupResults" class="search-results"></div>
                 </div>
                 <div class="search-box">
-                    <input type="text" id="destinationSearch" class="search-input" placeholder="🔴 Titik Tujuan (contoh: Jalan Sigura-gura)">
+                    <input type="text" id="destinationSearch" class="search-input" placeholder="🔴 Cari Titik Tujuan (contoh: Jalan Sigura-gura)">
                     <div id="destinationResults" class="search-results"></div>
                 </div>
             </div>
@@ -853,7 +854,7 @@ button:hover {
             if (distance < 2.5) {
                 fare = 5000;
             } else {
-                fare = Math.ceil(distance * 2100);
+                fare = Math.ceil(distance * 2000);
             }
             
             // Update form fields
@@ -892,7 +893,7 @@ button:hover {
         }
         
         // Buat message WhatsApp dengan encoding yang benar
-        let message = `Halo admin UBER, saya *${name}* ingin memesan UBER:\n\n`;
+        let message = `Halo admin UBER, saya *${name}* ingin memesan:\n\n`;
         message += `Tipe Pesanan: *${type}*\n\n`;
         
         if (pickupLocationLink) {
